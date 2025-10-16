@@ -1,0 +1,58 @@
+# ==============================================================================
+# 1. 프로젝트 및 모델 기본 설정
+# ==============================================================================
+project:
+  path: C:/3D_Anomaly_Project/results
+  seed: 42
+
+model:
+  # 'get_model' 함수가 요구하는 모델 이름
+  name: patchcore
+
+  # 'Engine'이 요구하는 모델의 정확한 파이썬 클래스 경로
+  class_path: anomalib.models.Patchcore
+
+  # 모델 생성 시 필요한 모든 상세 설정값
+  init_args:
+    input_size: [256, 256]
+    backbone: wide_resnet50_2
+    layers:
+      - layer2
+      - layer3
+    coreset_sampling_ratio: 0.1
+    num_neighbors: 9
+
+# ==============================================================================
+# 2. 데이터셋 설정
+# ==============================================================================
+dataset:
+  name: thermal_print
+  format: mvtec
+  root: C:/3D_Anomaly_Project/datasets
+  category: thermal_print
+  image_size: [256, 256]
+  train_batch_size: 32
+  test_batch_size: 32
+  # 윈도우 환경에서는 0으로 설정하는 것이 가장 안정적입니다.
+  num_workers: 0
+  normalization: IMAGENET
+  task: segmentation
+
+# ==============================================================================
+# 3. 학습(Trainer) 설정
+# ==============================================================================
+trainer:
+  accelerator: auto
+  devices: 1
+  enable_progress_bar: true
+  max_epochs: 3
+  log_every_n_steps: 50
+
+# ==============================================================================
+# 4. 후처리 및 성능 평가 설정
+# ==============================================================================
+post_processing:
+  normalization:
+    method: MIN_MAX
+  threshold:
+    method: ADAPTIVE
